@@ -15,7 +15,8 @@ using System.Windows.Shapes;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-
+using System.Data;
+using Microsoft.Win32;
 namespace GST_Support
 {
     /// <summary>
@@ -23,125 +24,121 @@ namespace GST_Support
     /// </summary>
     public partial class Excel_Data_Contrasts : Window
     {
+        DataTable dt_Tally = new DataTable();
         public Excel_Data_Contrasts()
         {
             InitializeComponent();
+            dt_Tally.Columns.Add("Col_Date", typeof(string));
+            dt_Tally.Columns.Add("Particulars", typeof(string));
+            dt_Tally.Columns.Add("GSTIN", typeof(string));
+            dt_Tally.Columns.Add("Vch_Type", typeof(string));
+            dt_Tally.Columns.Add("Vch_no", typeof(string));
+            dt_Tally.Columns.Add("Invoice_No", typeof(string));
+            dt_Tally.Columns.Add("Invoice_Date", typeof(string));
+            dt_Tally.Columns.Add("Taxable_Value", typeof(string));
+            dt_Tally.Columns.Add("Integrated_Tax_Amount", typeof(string));
+            dt_Tally.Columns.Add("Central_Tax_Amount", typeof(string));
+            dt_Tally.Columns.Add("State_Tax_Amount", typeof(string));
+            dt_Tally.Columns.Add("Cess_Amount", typeof(string));
+            dt_Tally.Columns.Add("Total_Tax_Amount", typeof(string));
         }
 
         private void btn_Validate_Click(object sender, RoutedEventArgs e)
         {
-            string str_GST_FilePath = @"F:\GST\Document\Book3.xlsx";
-            string str_DestinationFilePath = @"F:\GST\DocumentBook3.xlsx";
-            // Open the document for editing.
-            using (SpreadsheetDocument spreadsheetDocument_GST =
-                SpreadsheetDocument.Open(str_GST_FilePath, false))
+
+        }
+
+        private void btn_GST_Browse_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+                txt_GST_FileLoc.Text = openFileDialog.FileName.ToString();
+        }
+
+        private void btn_Tally_Browse_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            if (openFileDialog.ShowDialog() == true)
+                txt_Tally_FileLoc.Text = openFileDialog.FileName.ToString();
+        }
+        private void btn_Read_ExcelData_Click(object sender, RoutedEventArgs e)
+        {
+            ReadTallyData();
+        }
+
+        public void ReadTallyData()
+        {
+            string str_Tally_FilePath = txt_Tally_FileLoc.Text;
+
+            int int_rownumber = 0; int int_ColNumber = 0;
+            using (SpreadsheetDocument spreadsheetDocument_Tally =
+                SpreadsheetDocument.Open(str_Tally_FilePath, false))
             {
-                WorkbookPart workbookPart = spreadsheetDocument_GST.WorkbookPart;
-                WorksheetPart worksheetPart = workbookPart.WorksheetParts.First();
-                SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
-                SharedStringTablePart stringTablePart = spreadsheetDocument_GST.WorkbookPart.SharedStringTablePart;
-                string text;
+
+                WorkbookPart bkPart = spreadsheetDocument_Tally.WorkbookPart;
+                DocumentFormat.OpenXml.Spreadsheet.Workbook workbook = bkPart.Workbook;
+                DocumentFormat.OpenXml.Spreadsheet.Sheet s = workbook.Descendants<DocumentFormat.OpenXml.Spreadsheet.Sheet>().Where(sht => sht.Name == txt_tally_SheetName.Text).FirstOrDefault();
+                WorksheetPart wsPart = (WorksheetPart)bkPart.GetPartById(s.Id);
+                DocumentFormat.OpenXml.Spreadsheet.SheetData sheetData = wsPart.Worksheet.Elements<DocumentFormat.OpenXml.Spreadsheet.SheetData>().FirstOrDefault();
+                SharedStringTablePart stringTablePart = spreadsheetDocument_Tally.WorkbookPart.SharedStringTablePart;
+
+
+                //WorkbookPart workbookPart = spreadsheetDocument_Tally.WorkbookPart;
+                //DocumentFormat.OpenXml.Spreadsheet.Sheet s = workbookPart.Workbook.Descendants<DocumentFormat.OpenXml.Spreadsheet.Sheet>().Where(sht => sht.Name == "Sheet1").FirstOrDefault();
+                //WorksheetPart worksheetPart = workbookPart.WorksheetParts.First();
+                //SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
+
+                string str_CellValue;
+
                 foreach (Row r in sheetData.Elements<Row>())
                 {
-                    foreach (Cell c in r.Elements<Cell>())
+                    if (int_rownumber >= 9)
                     {
-                        try
+                        int_ColNumber = 0;
+                        DataRow dr_Tally_Row = dt_Tally.NewRow();
+                        foreach (Cell c in r.Elements<Cell>())
                         {
-                            text = "";
-                            text = (c.CellValue == null) ? c.InnerText : c.CellValue.Text;
-                            if (c.DataType != null && c.DataType.Value == CellValues.SharedString)
+                            try
                             {
-                                text = stringTablePart.SharedStringTable.ChildElements[Int32.Parse(c.CellValue.Text)].InnerText;
-                            }
-                            else
-                            {
-                                var cellText = (text ?? string.Empty).Trim();
-                                if (c.StyleIndex != null)
-                                {
-                                    var cellFormat = workbookPart.WorkbookStylesPart.Stylesheet.CellFormats.ChildElements[
-                                        int.Parse(c.StyleIndex.InnerText)] as CellFormat;
 
-                                    if (cellFormat != null)
+                                if (c.CellValue == null)
+                                {
+                                    if (int_ColNumber == 0) break;
+                                    int_ColNumber += 1;
+                                    continue;
+                                }
+                                str_CellValue = "";
+                                str_CellValue = (c.CellValue == null) ? c.InnerText : c.CellValue.Text;
+
+                                if (int_ColNumber == 0 || int_ColNumber == 6)
+                                {
+                                    str_CellValue = DateTime.FromOADate(Convert.ToDouble(str_CellValue)).ToShortDateString();
+                                }
+                                else
+                                {
+                                    if (c.DataType != null && c.DataType.Value == CellValues.SharedString)
                                     {
-                                        var dateFormat = GetDateTimeFormat(cellFormat.NumberFormatId);
-                                        if (!string.IsNullOrEmpty(dateFormat))
-                                        {
-                                            if (!string.IsNullOrEmpty(cellText))
-                                            {
-                                                if (double.TryParse(cellText, out var cellDouble))
-                                                {
-                                                    var theDate = DateTime.FromOADate(cellDouble);
-                                                    text = theDate.ToString(dateFormat);
-                                                }
-                                            }
-                                        }
+                                        str_CellValue = stringTablePart.SharedStringTable.ChildElements[Int32.Parse(c.CellValue.Text)].InnerText;
                                     }
                                 }
-                            }
-                            txt_test.Text = txt_test.Text + text + "  ";
-                        }
-                        catch (Exception ex)
-                        {
 
+                                dr_Tally_Row[int_ColNumber] = str_CellValue;
+                                int_ColNumber += 1;
+
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
                         }
+                        dt_Tally.Rows.Add(dr_Tally_Row);
+
                     }
-                    txt_test.Text = txt_test.Text + Environment.NewLine;
+                    int_rownumber = int_rownumber + 1;
                 }
             }
         }
-        private string GetDateTimeFormat(UInt32Value numberFormatId)
-        {
-            return DateFormatDictionary.ContainsKey(numberFormatId) ? DateFormatDictionary[numberFormatId] : string.Empty;
-        }
 
-        //// https://msdn.microsoft.com/en-GB/library/documentformat.openxml.spreadsheet.numberingformat(v=office.14).aspx
-        private readonly Dictionary<uint, string> DateFormatDictionary = new Dictionary<uint, string>()
-        {
-            [14] = "dd/MM/yyyy",
-            [15] = "d-MMM-yy",
-            [16] = "d-MMM",
-            [17] = "MMM-yy",
-            [18] = "h:mm AM/PM",
-            [19] = "h:mm:ss AM/PM",
-            [20] = "h:mm",
-            [21] = "h:mm:ss",
-            [22] = "M/d/yy h:mm",
-            [30] = "M/d/yy",
-            [34] = "yyyy-MM-dd",
-            [45] = "mm:ss",
-            [46] = "[h]:mm:ss",
-            [47] = "mmss.0",
-            [51] = "MM-dd",
-            [52] = "yyyy-MM-dd",
-            [53] = "yyyy-MM-dd",
-            [55] = "yyyy-MM-dd",
-            [56] = "yyyy-MM-dd",
-            [58] = "MM-dd",
-            [164] = "dd-MM-yyyy",
-            [165] = "M/d/yy",
-            [166] = "dd MMMM yyyy",
-            [167] = "dd/MM/yyyy",
-            [168] = "dd/MM/yy",
-            [169] = "d.M.yy",
-            [170] = "yyyy-MM-dd",
-            [171] = "dd MMMM yyyy",
-            [172] = "d MMMM yyyy",
-            [173] = "M/d",
-            [174] = "M/d/yy",
-            [175] = "MM/dd/yy",
-            [176] = "d-MMM",
-            [177] = "d-MMM-yy",
-            [178] = "dd-MMM-yy",
-            [179] = "MMM-yy",
-            [180] = "MMMM-yy",
-            [181] = "MMMM d, yyyy",
-            [182] = "M/d/yy hh:mm t",
-            [183] = "M/d/y HH:mm",
-            [184] = "MMM",
-            [185] = "MMM-dd",
-            [186] = "M/d/yyyy",
-            [187] = "d-MMM-yyyy"
-        };
     }
 
 }
