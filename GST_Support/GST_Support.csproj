@@ -104,5 +104,11 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\WordsMatching\WordsMatching.csproj">
+      <Project>{cffea5f4-2374-4336-956b-f6edb9e2fbf1}</Project>
+      <Name>WordsMatching</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
