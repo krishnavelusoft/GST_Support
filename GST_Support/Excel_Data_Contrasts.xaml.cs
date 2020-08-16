@@ -47,6 +47,8 @@ namespace GST_Support
             dt_Tally.Columns.Add("Total_Tax_Amount", typeof(string));
             dt_Tally.Columns.Add("TallyExcelRowNumber", typeof(string));
             dt_Tally.Columns.Add("GSTExcelRowNumber", typeof(string));
+            dt_Tally.Columns.Add("PercentageMatching", typeof(string));
+            dt_Tally.Columns.Add("Remarks", typeof(string));
 
             dt_GST.Columns.Add("GSTIN_of_supplier", typeof(string));
             dt_GST.Columns.Add("Legal_name_of_Supplier", typeof(string));
@@ -65,8 +67,9 @@ namespace GST_Support
             dt_GST.Columns.Add("Return_status", typeof(string));
             dt_GST.Columns.Add("GSTExcelRowNumber", typeof(string));
             dt_GST.Columns.Add("TallyExcelRowNumber", typeof(string));
+            dt_GST.Columns.Add("PercentageMatching", typeof(string));
+            dt_Tally.Columns.Add("Remarks", typeof(string));
 
-           
         }
 
         public void ClearValue()
@@ -290,10 +293,17 @@ namespace GST_Support
                     for (int iloop = 0; iloop < dr_Tally_data.Count(); iloop++)
                     {
                         int int_total_per = 0;
+                        str_rowRemarks = "";
                         string str_GST = dt_GST.Rows[gstLoop]["Invoice_number"].ToString().Trim();
                         string str_Tally = dr_Tally_data[iloop]["Invoice_No"].ToString().Trim();
                         int int_INV_Number_Percentage = fn_GST_Tally_Data_Maching(str_GST, str_Tally,"Invoice Number");
                         int_total_per += int_INV_Number_Percentage;
+
+                        str_GST = dt_GST.Rows[gstLoop]["Invoice_Date"].ToString().Trim();
+                        str_Tally = dr_Tally_data[iloop]["Invoice_Date"].ToString().Trim();
+                        int int_Inv_Date_Percentage = fn_GST_Tally_Data_Maching(str_GST, str_Tally, "State Tax");
+                        int_total_per += int_Inv_Date_Percentage;
+
 
                         str_GST = dt_GST.Rows[gstLoop]["Taxable_Value"].ToString().Trim();
                         str_Tally = dr_Tally_data[iloop]["Taxable_Value"].ToString().Trim();
@@ -311,21 +321,32 @@ namespace GST_Support
                         int int_StateTax_Percentage = fn_GST_Tally_Data_Maching(str_GST, str_Tally, "State Tax");
                         int_total_per += int_StateTax_Percentage;
 
-                        int int_average = int_total_per / 4;
+
+                        int int_average = int_total_per / 5;
 
                         if(int_average ==100)
                         {
                             dr_Tally_data[iloop]["GSTExcelRowNumber"] = dt_GST.Rows[gstLoop]["GSTExcelRowNumber"].ToString();
+                            dr_Tally_data[iloop]["PercentageMatching"] = int_average.ToString();
                             dt_Tally.AcceptChanges();
                             dt_GST.Rows[gstLoop]["TallyExcelRowNumber"] = dr_Tally_data[iloop]["TallyExcelRowNumber"].ToString();
+                            dt_GST.Rows[gstLoop]["PercentageMatching"] = int_average.ToString();
+                            dt_GST.AcceptChanges();
+                            break;
+                        }
+                        else if(int_average >=80)
+                        {
+                            dr_Tally_data[iloop]["GSTExcelRowNumber"] = dt_GST.Rows[gstLoop]["GSTExcelRowNumber"].ToString();
+                            dr_Tally_data[iloop]["PercentageMatching"] = int_average.ToString();
+                            dr_Tally_data[iloop]["Remarks"] = str_rowRemarks;
+                            dt_Tally.AcceptChanges();
+
+                            dt_GST.Rows[gstLoop]["TallyExcelRowNumber"] = dr_Tally_data[iloop]["TallyExcelRowNumber"].ToString();
+                            dt_GST.Rows[gstLoop]["PercentageMatching"] = int_average.ToString();
+                            dt_GST.Rows[gstLoop]["Remarks"] = str_rowRemarks;
                             dt_GST.AcceptChanges();
                         }
-                        
-                        
-
-                        //WordsMatching.MatchsMaker match= new WordsMatching.MatchsMaker()
                     }
-
                     //&& tallyRow.Field<string>("Taxable_Value") == dt_GST.Rows[gstLoop]["Taxable_Value"].ToString()
                     //                && tallyRow.Field<string>("Central_Tax_Amount") == dt_GST.Rows[gstLoop]["Central_Tax"].ToString()
                     //                 && tallyRow.Field<string>("State_Tax_Amount") == dt_GST.Rows[gstLoop]["State_Tax"].ToString()
