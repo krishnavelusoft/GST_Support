@@ -5,20 +5,92 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GST_Support"
         mc:Ignorable="d"
-        Title="Data Contrasts" Height="450" Width="800">
+        Title="Data Contrasts" Height="800" Width="1500">
     <Grid>
-        <Button x:Name="btn_Validate" Content="Validate" HorizontalAlignment="Left" Margin="366,391,0,0" VerticalAlignment="Top" Width="75" Click="btn_Validate_Click"/>
+        <Button x:Name="btn_Validate" Content="Validate" HorizontalAlignment="Left" Margin="344,841,0,0" VerticalAlignment="Top" Width="75" Click="btn_Validate_Click"/>
         <Label Content="GST File Location" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txt_GST_FileLoc" HorizontalAlignment="Left" Height="23" Margin="116,9,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="431" IsEnabled="False"/>
-        <Button x:Name="btn_GST_Browse" Content="Browse" HorizontalAlignment="Left" Margin="552,11,0,0" VerticalAlignment="Top" Width="75" Click="btn_GST_Browse_Click"/>
-        <Label Content="Sheet Name" HorizontalAlignment="Left" Margin="648,8,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txt_GST_SheetName" HorizontalAlignment="Left" Height="23" Margin="728,9,0,0" TextWrapping="Wrap" Text="Sheet1" VerticalAlignment="Top" Width="56" RenderTransformOrigin="0.431,-0.117"/>
+        <TextBox x:Name="txt_GST_FileLoc" HorizontalAlignment="Left" Height="23" Margin="116,9,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="390" IsEnabled="False"/>
+        <Button x:Name="btn_GST_Browse" Content="Browse" HorizontalAlignment="Left" Margin="516,11,0,0" VerticalAlignment="Top" Width="75" Click="btn_GST_Browse_Click"/>
+        <Label Content="Sheet Name" HorizontalAlignment="Left" Margin="612,8,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txt_GST_SheetName" HorizontalAlignment="Left" Height="23" Margin="692,9,0,0" TextWrapping="Wrap" Text="Sheet1" VerticalAlignment="Top" Width="56" RenderTransformOrigin="0.431,-0.117"/>
         <Label Content="Tally File Location" HorizontalAlignment="Left" Margin="10,38,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txt_Tally_FileLoc" HorizontalAlignment="Left" Height="23" Margin="116,38,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="431" IsEnabled="False"/>
-        <Button x:Name="btn_Tally_Browse" Content="Browse" HorizontalAlignment="Left" Margin="552,41,0,0" VerticalAlignment="Top" Width="75" Click="btn_Tally_Browse_Click"/>
-        <Label Content="Sheet Name" HorizontalAlignment="Left" Margin="648,38,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txt_tally_SheetName" HorizontalAlignment="Left" Height="23" Margin="728,38,0,0" TextWrapping="Wrap" Text="Sheet2" VerticalAlignment="Top" Width="56" RenderTransformOrigin="0.431,-0.117"/>
-        <Button x:Name="btn_Read_ExcelData" Content="Read Data" HorizontalAlignment="Left" Margin="10,69,0,0" VerticalAlignment="Top" Width="774" Click="btn_Read_ExcelData_Click"/>
+        <TextBox x:Name="txt_Tally_FileLoc" HorizontalAlignment="Left" Height="23" Margin="116,38,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="390" IsEnabled="False"/>
+        <Button x:Name="btn_Tally_Browse" Content="Browse" HorizontalAlignment="Left" Margin="516,41,0,0" VerticalAlignment="Top" Width="75" Click="btn_Tally_Browse_Click"/>
+        <Label Content="Sheet Name" HorizontalAlignment="Left" Margin="612,38,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txt_tally_SheetName" HorizontalAlignment="Left" Height="23" Margin="692,38,0,0" TextWrapping="Wrap" Text="Sheet2" VerticalAlignment="Top" Width="56" RenderTransformOrigin="0.431,-0.117"/>
+        <Button x:Name="btn_Read_ExcelData" Content="Read Data" HorizontalAlignment="Left" Margin="10,69,0,0" VerticalAlignment="Top" Width="742" Click="btn_Read_ExcelData_Click"/>
+        <DataGrid x:Name="dg_GST" HorizontalAlignment="Left" Height="300" AutoGenerateColumns="False" VerticalAlignment="Top" Width="838" Margin="12,105,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="Row #" Width="60" Binding="{Binding GSTExcelRowNumber}" />
+                <DataGridTextColumn Header="% Match" Width="60" Binding="{Binding PercentageMatching}" />
+                <DataGridTemplateColumn Header="AML">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button x:Name="btn_GST_AML" Tag="GST" Click="btn_AML_Click">AML</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="MML">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button >MML</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="GSTIN of supplier" Width="120" Binding="{Binding GSTIN_of_supplier}" />
+                <DataGridTextColumn Header="Invoice Number" Width="150" Binding="{Binding Invoice_number}" />
+                <DataGridTextColumn Header="Invoice Date" Binding="{Binding Invoice_Date}" />
+                <DataGridTextColumn Header="Taxable Value" Binding="{Binding Taxable_Value}" />
+                <DataGridTextColumn Header="Integrated Tax" Binding="{Binding Integrated_Tax}" />
+                <DataGridTextColumn Header="Central Tax" Binding="{Binding Central_Tax}" />
+                <DataGridTextColumn Header="State Tax" Binding="{Binding State_Tax}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <DataGrid x:Name="dg_Tally" HorizontalAlignment="Left" Height="350" AutoGenerateColumns="False" VerticalAlignment="Top" Width="838" Margin="12,410,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+
+                <DataGridTextColumn Header="Row #" Width="60" Binding="{Binding TallyExcelRowNumber}" />
+                <DataGridTextColumn Header="% Match" Width="60" Binding="{Binding PercentageMatching}" />
+                <DataGridTemplateColumn Header="AML">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Tag="TALLY" Click="btn_AML_Click">AML</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="MML">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button >MML</Button>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="GSTIN of supplier" Width="120" Binding="{Binding GSTIN}" />
+                <DataGridTextColumn Header="Invoice Number" Width="150" Binding="{Binding Invoice_No}" />
+                <DataGridTextColumn Header="Invoice Date" Binding="{Binding Invoice_Date}" />
+                <DataGridTextColumn Header="Taxable Value" Binding="{Binding Taxable_Value}" />
+                <DataGridTextColumn Header="Integrated Tax" Binding="{Binding Integrated_Tax_Amount}" />
+                <DataGridTextColumn Header="Central Tax" Binding="{Binding Central_Tax_Amount}" />
+                <DataGridTextColumn Header="State Tax" Binding="{Binding State_Tax_Amount}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <DataGrid x:Name="dg_matching" HorizontalAlignment="Left" Height="271" Margin="874,54,0,0" VerticalAlignment="Top" Width="610" AutoGenerateColumns="False" SelectionChanged="dg_matching_SelectionChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="GST Excel Row#" Width="120" Binding="{Binding GSTExcelRowNumber}" />
+                <DataGridTextColumn Header="Tally Excel Row#" Width="150" Binding="{Binding TallyExcelRowNumber}" />
+                <DataGridTextColumn Header="% matching" Binding="{Binding PercentageMatching}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <Label Content="GST Invoice number" HorizontalAlignment="Left" Margin="874,356,0,0" VerticalAlignment="Top" Width="125"/>
+        <TextBox x:Name="txt_GST_INV_Number" HorizontalAlignment="Left" Height="23" Margin="999,356,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+        <Grid Margin="999,377,321,365">
+            <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pbStatus" Height="30" Margin="0,0,-0.4,-1.6"   />
+            <TextBlock Text="{Binding ElementName=pbStatus, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+
+        </Grid>
+        <Label Content="Tally Invoice number" HorizontalAlignment="Left" Margin="874,404,0,0" VerticalAlignment="Top" Width="125"/>
+        <TextBox x:Name="txt_Tally_INV_Number" HorizontalAlignment="Left" Height="23" Margin="999,404,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
 
     </Grid>
 </Window>

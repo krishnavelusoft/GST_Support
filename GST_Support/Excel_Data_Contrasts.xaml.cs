@@ -17,6 +17,8 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Data;
 using Microsoft.Win32;
+
+
 namespace GST_Support
 {
     /// <summary>
@@ -26,12 +28,14 @@ namespace GST_Support
     {
         DataTable dt_Tally = new DataTable();
         DataTable dt_GST = new DataTable();
+        DataTable dt_matching_Det = new DataTable();
         string str_rowRemarks;
-     
+
 
         public Excel_Data_Contrasts()
         {
             InitializeComponent();
+
             dt_Tally.Columns.Add("Col_Date", typeof(string));
             dt_Tally.Columns.Add("Particulars", typeof(string));
             dt_Tally.Columns.Add("GSTIN", typeof(string));
@@ -45,8 +49,8 @@ namespace GST_Support
             dt_Tally.Columns.Add("State_Tax_Amount", typeof(string));
             dt_Tally.Columns.Add("Cess_Amount", typeof(string));
             dt_Tally.Columns.Add("Total_Tax_Amount", typeof(string));
-            dt_Tally.Columns.Add("TallyExcelRowNumber", typeof(string));
-            dt_Tally.Columns.Add("GSTExcelRowNumber", typeof(string));
+            dt_Tally.Columns.Add("TallyExcelRowNumber", typeof(Int32));
+            dt_Tally.Columns.Add("GSTExcelRowNumber", typeof(Int32));
             dt_Tally.Columns.Add("PercentageMatching", typeof(string));
             dt_Tally.Columns.Add("Remarks", typeof(string));
 
@@ -65,11 +69,23 @@ namespace GST_Support
             dt_GST.Columns.Add("State_Tax", typeof(string));
             dt_GST.Columns.Add("Cess", typeof(string));
             dt_GST.Columns.Add("Return_status", typeof(string));
-            dt_GST.Columns.Add("GSTExcelRowNumber", typeof(string));
-            dt_GST.Columns.Add("TallyExcelRowNumber", typeof(string));
+            dt_GST.Columns.Add("GSTExcelRowNumber", typeof(Int32));
+            dt_GST.Columns.Add("TallyExcelRowNumber", typeof(Int32));
             dt_GST.Columns.Add("PercentageMatching", typeof(string));
-            dt_Tally.Columns.Add("Remarks", typeof(string));
+            dt_GST.Columns.Add("Remarks", typeof(string));
 
+            dt_matching_Det.Columns.Add("GSTExcelRowNumber");
+            dt_matching_Det.Columns.Add("TallyExcelRowNumber");
+            dt_matching_Det.Columns.Add("PercentageMatching", typeof(string));
+            dt_matching_Det.Columns.Add("Remarks", typeof(string));
+            dt_matching_Det.Columns.Add("Invoice_number_Per", typeof(string));
+            dt_matching_Det.Columns.Add("Invoice_Date_Per", typeof(string));
+            dt_matching_Det.Columns.Add("Taxable_Value_Per", typeof(string));
+            dt_matching_Det.Columns.Add("Integrated_Tax_Per", typeof(string));
+            dt_matching_Det.Columns.Add("Central_Tax_Per", typeof(string));
+            dt_matching_Det.Columns.Add("State_Tax_Per", typeof(string));
+
+            ClearValue();
         }
 
         public void ClearValue()
@@ -77,6 +93,20 @@ namespace GST_Support
             str_rowRemarks = "";
             dt_Tally.Rows.Clear();
             dt_GST.Rows.Clear();
+            dg_GST.Columns[1].Visibility = Visibility.Hidden;
+            dg_GST.Columns[2].Visibility = Visibility.Hidden;
+            dg_GST.Columns[3].Visibility = Visibility.Hidden;
+
+            dg_Tally.Columns[1].Visibility = Visibility.Hidden;
+            dg_Tally.Columns[2].Visibility = Visibility.Hidden;
+            dg_Tally.Columns[3].Visibility = Visibility.Hidden;
+
+            txt_GST_FileLoc.Text = @"F:\GST\Document\book3.xlsx";
+            txt_Tally_FileLoc.Text = txt_GST_FileLoc.Text;
+
+            btn_Read_ExcelData_Click(btn_Read_ExcelData, new RoutedEventArgs());
+            btn_Validate_Click(btn_Validate, new RoutedEventArgs());
+
         }
 
 
@@ -95,15 +125,22 @@ namespace GST_Support
         }
         private void btn_Read_ExcelData_Click(object sender, RoutedEventArgs e)
         {
-            ClearValue();
+            //ClearValue();
             ReadTallyData();
             ReadGSTData();
+
+            dg_GST.ItemsSource = dt_GST.DefaultView;
+            dg_Tally.ItemsSource = dt_Tally.DefaultView;
+
+            dg_GST.Columns[3].Visibility = Visibility.Visible;
+            dg_Tally.Columns[3].Visibility = Visibility.Visible;
+
         }
 
         public void ReadTallyData()
         {
             string str_Tally_FilePath = txt_Tally_FileLoc.Text;
-           
+
             int int_rownumber = 0; int int_ColNumber = 0;
             using (SpreadsheetDocument spreadsheetDocument_Tally =
                 SpreadsheetDocument.Open(str_Tally_FilePath, false))
@@ -177,7 +214,7 @@ namespace GST_Support
         public void ReadGSTData()
         {
             string str_Tally_FilePath = txt_GST_FileLoc.Text;
-            
+
             int int_rownumber = 0; int int_ColNumber = 0;
             using (SpreadsheetDocument spreadsheetDocument_GST =
                 SpreadsheetDocument.Open(str_Tally_FilePath, false))
@@ -250,11 +287,16 @@ namespace GST_Support
 
                 }
             }
+
         }
 
         private void btn_Validate_Click(object sender, RoutedEventArgs e)
         {
             ValidateGSTData();
+            dg_GST.Columns[1].Visibility = Visibility.Visible;
+            dg_Tally.Columns[1].Visibility = Visibility.Visible;
+            dg_GST.Columns[2].Visibility = Visibility.Visible;
+            dg_Tally.Columns[2].Visibility = Visibility.Visible;
         }
 
         public void ValidateGSTData()
@@ -280,14 +322,29 @@ namespace GST_Support
                     if (dr_Tally_data.Count() == 1)
                     {
                         dr_Tally_data[0]["GSTExcelRowNumber"] = dt_GST.Rows[gstLoop]["GSTExcelRowNumber"].ToString();
+                        dr_Tally_data[0]["PercentageMatching"] = "100";
                         dt_Tally.AcceptChanges();
                         dt_GST.Rows[gstLoop]["TallyExcelRowNumber"] = dr_Tally_data[0]["TallyExcelRowNumber"].ToString();
+                        dt_GST.Rows[gstLoop]["PercentageMatching"] = "100";
                         dt_GST.AcceptChanges();
+                        DataRow dr_matching = dt_matching_Det.NewRow();
+                        dr_matching["GSTExcelRowNumber"] = dt_GST.Rows[gstLoop]["GSTExcelRowNumber"].ToString();
+                        dr_matching["TallyExcelRowNumber"] = dr_Tally_data[0]["TallyExcelRowNumber"].ToString();
+                        dr_matching["PercentageMatching"] = "100";
+                        dr_matching["Remarks"] = "Direct Matching";
+                        dr_matching["Invoice_number_Per"] = "100";
+                        dr_matching["Invoice_Date_Per"] = "100";
+                        dr_matching["Taxable_Value_Per"] = "100";
+                        dr_matching["Integrated_Tax_Per"] = "100";
+                        dr_matching["Central_Tax_Per"] = "100";
+                        dr_matching["State_Tax_Per"] = "100";
+                        dt_matching_Det.Rows.Add(dr_matching);
                         continue;
                     }
 
                     dr_Tally_data = (from tallyRow in dt_Tally.AsEnumerable()
                                      where tallyRow.Field<string>("GSTIN") == dt_GST.Rows[gstLoop]["GSTIN_of_supplier"].ToString()
+                                     && tallyRow.Field<string>("PercentageMatching") != "100"
                                      select tallyRow).ToList();
 
                     for (int iloop = 0; iloop < dr_Tally_data.Count(); iloop++)
@@ -296,7 +353,7 @@ namespace GST_Support
                         str_rowRemarks = "";
                         string str_GST = dt_GST.Rows[gstLoop]["Invoice_number"].ToString().Trim();
                         string str_Tally = dr_Tally_data[iloop]["Invoice_No"].ToString().Trim();
-                        int int_INV_Number_Percentage = fn_GST_Tally_Data_Maching(str_GST, str_Tally,"Invoice Number");
+                        int int_INV_Number_Percentage = fn_GST_Tally_Data_Maching(str_GST, str_Tally, "Invoice Number");
                         int_total_per += int_INV_Number_Percentage;
 
                         str_GST = dt_GST.Rows[gstLoop]["Invoice_Date"].ToString().Trim();
@@ -324,17 +381,7 @@ namespace GST_Support
 
                         int int_average = int_total_per / 5;
 
-                        if(int_average ==100)
-                        {
-                            dr_Tally_data[iloop]["GSTExcelRowNumber"] = dt_GST.Rows[gstLoop]["GSTExcelRowNumber"].ToString();
-                            dr_Tally_data[iloop]["PercentageMatching"] = int_average.ToString();
-                            dt_Tally.AcceptChanges();
-                            dt_GST.Rows[gstLoop]["TallyExcelRowNumber"] = dr_Tally_data[iloop]["TallyExcelRowNumber"].ToString();
-                            dt_GST.Rows[gstLoop]["PercentageMatching"] = int_average.ToString();
-                            dt_GST.AcceptChanges();
-                            break;
-                        }
-                        else if(int_average >=80)
+                        if (int_average >= 60)
                         {
                             dr_Tally_data[iloop]["GSTExcelRowNumber"] = dt_GST.Rows[gstLoop]["GSTExcelRowNumber"].ToString();
                             dr_Tally_data[iloop]["PercentageMatching"] = int_average.ToString();
@@ -345,6 +392,23 @@ namespace GST_Support
                             dt_GST.Rows[gstLoop]["PercentageMatching"] = int_average.ToString();
                             dt_GST.Rows[gstLoop]["Remarks"] = str_rowRemarks;
                             dt_GST.AcceptChanges();
+
+                            DataRow dr_matching = dt_matching_Det.NewRow();
+                            dr_matching["GSTExcelRowNumber"] = dt_GST.Rows[gstLoop]["GSTExcelRowNumber"].ToString();
+                            dr_matching["TallyExcelRowNumber"] = dr_Tally_data[iloop]["TallyExcelRowNumber"].ToString();
+                            dr_matching["PercentageMatching"] = int_average.ToString();
+                            dr_matching["Remarks"] = str_rowRemarks;
+                            dr_matching["Invoice_number_Per"] = int_INV_Number_Percentage.ToString();
+                            dr_matching["Invoice_Date_Per"] = int_Inv_Date_Percentage.ToString();
+                            dr_matching["Taxable_Value_Per"] = int_TaxValue_Percentage.ToString();
+                            dr_matching["Integrated_Tax_Per"] = "0";
+                            dr_matching["Central_Tax_Per"] = int_CentralTax_Percentage.ToString();
+                            dr_matching["State_Tax_Per"] = int_StateTax_Percentage.ToString();
+                            dt_matching_Det.Rows.Add(dr_matching);
+                        }
+                        if (int_average == 100)
+                        {
+                            break;
                         }
                     }
                     //&& tallyRow.Field<string>("Taxable_Value") == dt_GST.Rows[gstLoop]["Taxable_Value"].ToString()
@@ -358,13 +422,13 @@ namespace GST_Support
             }
         }
 
-        public int fn_GST_Tally_Data_Maching(string str_GST, string str_Tally,string DataFor)
+        public int fn_GST_Tally_Data_Maching(string str_GST, string str_Tally, string DataFor)
         {
             int int_PercentageMaching = 0;
             if (str_GST == str_Tally)
             {
                 int_PercentageMaching = 100;
-                str_rowRemarks += DataFor + "  Direct Maching  " + int_PercentageMaching.ToString() + "%" + System.Environment.NewLine ;
+                str_rowRemarks += DataFor + "  Direct Maching  " + int_PercentageMaching.ToString() + "%" + System.Environment.NewLine;
                 return int_PercentageMaching;
             }
 
@@ -392,6 +456,37 @@ namespace GST_Support
 
         }
 
+        private void btn_AML_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DataRowView dataRowView = (DataRowView)((Button)e.Source).DataContext;
+                DataTable dt_matching_Rows = new DataTable();
+                if (((Button)sender).Tag.ToString() == "GST")
+                {
+
+                    dt_matching_Rows = (from matchingRows in dt_matching_Det.AsEnumerable()
+                                        where matchingRows.Field<string>("GSTExcelRowNumber") == dataRowView["GSTExcelRowNumber"].ToString()
+                                        select matchingRows).CopyToDataTable();
+                }
+                else
+                {
+                    dt_matching_Rows = (from matchingRows in dt_matching_Det.AsEnumerable()
+                                        where matchingRows.Field<string>("TallyExcelRowNumber") == dataRowView["TallyExcelRowNumber"].ToString()
+                                        select matchingRows).CopyToDataTable();
+                }
+                dg_matching.ItemsSource = dt_matching_Rows.DefaultView;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+        }
+
+        private void dg_matching_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+           // (((System.Data.DataRowView)(dg_matching.SelectedValue)).Row)[0]
+        }
     }
 
 }
