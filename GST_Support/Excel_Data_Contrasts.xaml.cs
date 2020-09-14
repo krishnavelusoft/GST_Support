@@ -30,7 +30,7 @@ namespace GST_Support
         DataTable dt_GST = new DataTable();
         DataTable dt_matching_Det = new DataTable();
         string str_rowRemarks;
-
+        int int_Selected = 1;//1--> GST ; 2-->TALLY
 
         public Excel_Data_Contrasts()
         {
@@ -86,6 +86,8 @@ namespace GST_Support
             dt_matching_Det.Columns.Add("State_Tax_Per", typeof(string));
 
             ClearValue();
+            txt_Tally_INV_Number.Text = "krishna";
+            pb_inv_number.Value = 30;
         }
 
         public void ClearValue()
@@ -101,11 +103,11 @@ namespace GST_Support
             dg_Tally.Columns[2].Visibility = Visibility.Hidden;
             dg_Tally.Columns[3].Visibility = Visibility.Hidden;
 
-            txt_GST_FileLoc.Text = @"F:\GST\Document\book3.xlsx";
-            txt_Tally_FileLoc.Text = txt_GST_FileLoc.Text;
+            //txt_GST_FileLoc.Text = @"F:\GST\Document\book3.xlsx";
+            //txt_Tally_FileLoc.Text = txt_GST_FileLoc.Text;
 
-            btn_Read_ExcelData_Click(btn_Read_ExcelData, new RoutedEventArgs());
-            btn_Validate_Click(btn_Validate, new RoutedEventArgs());
+            //btn_Read_ExcelData_Click(btn_Read_ExcelData, new RoutedEventArgs());
+            //btn_Validate_Click(btn_Validate, new RoutedEventArgs());
 
         }
 
@@ -125,7 +127,7 @@ namespace GST_Support
         }
         private void btn_Read_ExcelData_Click(object sender, RoutedEventArgs e)
         {
-            //ClearValue();
+            ClearValue();
             ReadTallyData();
             ReadGSTData();
 
@@ -141,7 +143,7 @@ namespace GST_Support
         {
             string str_Tally_FilePath = txt_Tally_FileLoc.Text;
 
-            int int_rownumber = 0; int int_ColNumber = 0;
+            int int_ColNumber = 0;
             using (SpreadsheetDocument spreadsheetDocument_Tally =
                 SpreadsheetDocument.Open(str_Tally_FilePath, false))
             {
@@ -154,59 +156,91 @@ namespace GST_Support
                 SharedStringTablePart stringTablePart = spreadsheetDocument_Tally.WorkbookPart.SharedStringTablePart;
 
 
-                //WorkbookPart workbookPart = spreadsheetDocument_Tally.WorkbookPart;
-                //DocumentFormat.OpenXml.Spreadsheet.Sheet s = workbookPart.Workbook.Descendants<DocumentFormat.OpenXml.Spreadsheet.Sheet>().Where(sht => sht.Name == "Sheet1").FirstOrDefault();
-                //WorksheetPart worksheetPart = workbookPart.WorksheetParts.First();
-                //SheetData sheetData = worksheetPart.Worksheet.Elements<SheetData>().First();
-
                 string str_CellValue;
-
+                bool bol_RecordStarted = false;
+                bool bol_InsertRow = false;
+                string str_Ready = "NOT_READY";
                 foreach (Row r in sheetData.Elements<Row>())
                 {
-                    if (int_rownumber >= 9)
-                    {
-                        int_ColNumber = 0;
-                        DataRow dr_Tally_Row = dt_Tally.NewRow();
-                        foreach (Cell c in r.Elements<Cell>())
-                        {
-                            try
-                            {
 
-                                if (c.CellValue == null)
+                    bol_InsertRow = false;
+                    int_ColNumber = 0;
+                    DataRow dr_Tally_Row = dt_Tally.NewRow();
+                    foreach (Cell c in r.Elements<Cell>())
+                    {
+                        try
+                        {
+                            str_CellValue = "";
+                            if (bol_RecordStarted == false)
+                            {
+                                if (c.CellValue == null && bol_RecordStarted == false)
                                 {
-                                    if (int_ColNumber == 0) break;
+                                    break;
+                                }
+
+                                str_CellValue = (c.CellValue == null) ? c.InnerText : c.CellValue.Text;
+                                if (c.DataType != null && c.DataType.Value == CellValues.SharedString)
+                                {
+                                    str_CellValue = stringTablePart.SharedStringTable.ChildElements[Int32.Parse(c.CellValue.Text)].InnerText;
+                                }
+                                if (str_CellValue.ToUpper() == "DATE")
+                                {
+                                    bol_RecordStarted = true;
+                                    break;
+                                }
+                                break;
+                            }
+                            if (str_Ready == "NOT_READY")
+                            {
+                                str_Ready = "READY";
+                                break;
+                            }
+                            if (c.CellValue == null && bol_RecordStarted == true)
+                            {
+                                if (int_ColNumber == 0) break;
+                                if (int_ColNumber <= 6)
+                                {
                                     int_ColNumber += 1;
                                     continue;
                                 }
-                                str_CellValue = "";
-                                str_CellValue = (c.CellValue == null) ? c.InnerText : c.CellValue.Text;
-
-                                if (int_ColNumber == 0 || int_ColNumber == 6)
-                                {
-                                    str_CellValue = DateTime.FromOADate(Convert.ToDouble(str_CellValue)).ToShortDateString();
-                                }
-                                else
-                                {
-                                    if (c.DataType != null && c.DataType.Value == CellValues.SharedString)
-                                    {
-                                        str_CellValue = stringTablePart.SharedStringTable.ChildElements[Int32.Parse(c.CellValue.Text)].InnerText;
-                                    }
-                                }
-
-                                dr_Tally_Row[int_ColNumber] = str_CellValue;
-                                int_ColNumber += 1;
-
                             }
-                            catch (Exception ex)
+
+
+                            str_CellValue = (c.CellValue == null) ? c.InnerText : c.CellValue.Text;
+                            if (int_ColNumber == 0 || int_ColNumber == 6)
                             {
-
+                                str_CellValue = DateTime.FromOADate(Convert.ToDouble(str_CellValue)).ToShortDateString();
                             }
+                            else
+                            {
+                                if (c.DataType != null && c.DataType.Value == CellValues.SharedString)
+                                {
+                                    str_CellValue = stringTablePart.SharedStringTable.ChildElements[Int32.Parse(c.CellValue.Text)].InnerText;
+                                }
+                            }
+                            if(int_ColNumber>6)
+                            {
+                                if(str_CellValue.Trim().Length==0)
+                                {
+                                    str_CellValue = "0";
+                                }
+                            }    
+                            dr_Tally_Row[int_ColNumber] = str_CellValue;
+                            int_ColNumber += 1;
+                            bol_InsertRow = true;
                         }
-                        dr_Tally_Row["TallyExcelRowNumber"] = r.RowIndex.Value.ToString();
-                        dt_Tally.Rows.Add(dr_Tally_Row);
+                        catch (Exception ex)
+                        {
 
+                        }
                     }
-                    int_rownumber = int_rownumber + 1;
+                    dr_Tally_Row["TallyExcelRowNumber"] = r.RowIndex.Value.ToString();
+                    if (bol_InsertRow)
+                    {
+                        dt_Tally.Rows.Add(dr_Tally_Row);
+                    }
+
+
                 }
             }
         }
@@ -462,15 +496,19 @@ namespace GST_Support
             {
                 DataRowView dataRowView = (DataRowView)((Button)e.Source).DataContext;
                 DataTable dt_matching_Rows = new DataTable();
+                string str_selectedRow_Number = "";
                 if (((Button)sender).Tag.ToString() == "GST")
                 {
-
+                    int_Selected = 1;
+                    str_selectedRow_Number = dataRowView["GSTExcelRowNumber"].ToString();
                     dt_matching_Rows = (from matchingRows in dt_matching_Det.AsEnumerable()
-                                        where matchingRows.Field<string>("GSTExcelRowNumber") == dataRowView["GSTExcelRowNumber"].ToString()
+                                        where matchingRows.Field<string>("GSTExcelRowNumber") == str_selectedRow_Number
                                         select matchingRows).CopyToDataTable();
+                    fn_Fill_Details(str_selectedRow_Number);
                 }
                 else
                 {
+                    int_Selected = 2;
                     dt_matching_Rows = (from matchingRows in dt_matching_Det.AsEnumerable()
                                         where matchingRows.Field<string>("TallyExcelRowNumber") == dataRowView["TallyExcelRowNumber"].ToString()
                                         select matchingRows).CopyToDataTable();
@@ -482,10 +520,59 @@ namespace GST_Support
                 MessageBox.Show(ex.Message.ToString());
             }
         }
+        public void fn_Fill_Details(string str_sel_Row_number)
+        {
 
+            if (int_Selected == 1)
+            {
+                var dr_GST_Row = (from GST_Row in dt_GST.AsEnumerable()
+                                  where GST_Row.Field<Int32>("GSTExcelRowNumber") == int.Parse(str_sel_Row_number)
+                                  select GST_Row).ToList();
+
+                txt_GST_INV_Number.Text = dr_GST_Row[0]["Invoice_number"].ToString();
+                txt_GST_INV_Date.Text = dr_GST_Row[0]["Invoice_Date"].ToString();
+                txt_GST_TaxableValue.Text = dr_GST_Row[0]["Taxable_Value"].ToString();
+                txt_GST_IntegratedTax.Text = dr_GST_Row[0]["Integrated_Tax"].ToString();
+                txt_GST_CentralTax.Text = dr_GST_Row[0]["Central_Tax"].ToString();
+                txt_GST_StateTax.Text = dr_GST_Row[0]["State_Tax"].ToString();
+
+            }
+        }
         private void dg_matching_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-           // (((System.Data.DataRowView)(dg_matching.SelectedValue)).Row)[0]
+            if (dg_matching.SelectedValue == null)
+            {
+                return;
+            }
+
+            if (int_Selected == 1)
+            {
+
+                string str_select_tally_row_Number = (((System.Data.DataRowView)(dg_matching.SelectedValue)).Row)[1].ToString();
+                var dr_Tally_Row = (from Tally_Row in dt_Tally.AsEnumerable()
+                                    where Tally_Row.Field<Int32>("TallyExcelRowNumber") == int.Parse(str_select_tally_row_Number)
+                                    select Tally_Row).ToList();
+
+                txt_Tally_INV_Number.Text = dr_Tally_Row[0]["Invoice_No"].ToString();
+                txt_Tally_INV_Date.Text = dr_Tally_Row[0]["Invoice_Date"].ToString();
+                txt_Tally_TaxableValue.Text = dr_Tally_Row[0]["Taxable_Value"].ToString();
+                txt_Tally_IntegratedTax.Text = dr_Tally_Row[0]["Integrated_Tax_Amount"].ToString();
+                txt_Tally_CentralTax.Text = dr_Tally_Row[0]["Central_Tax_Amount"].ToString();
+                txt_Tally_StateTax.Text = dr_Tally_Row[0]["State_Tax_Amount"].ToString();
+            }
+            fn_MatchingPercentage();
+        }
+        public void fn_MatchingPercentage()
+        {
+            str_rowRemarks = "";
+            pb_inv_number.Value = fn_GST_Tally_Data_Maching(txt_GST_INV_Number.Text, txt_Tally_INV_Number.Text, "InvoiceNumber");
+            pb_inv_Date.Value = fn_GST_Tally_Data_Maching(txt_GST_INV_Date.Text, txt_Tally_INV_Date.Text, "InvoiceDate");
+            pb_TaxableValue.Value = fn_GST_Tally_Data_Maching(txt_GST_TaxableValue.Text, txt_Tally_TaxableValue.Text, "TaxableValue");
+            pb_IntegratedTax.Value = fn_GST_Tally_Data_Maching(txt_GST_IntegratedTax.Text, txt_Tally_IntegratedTax.Text, "IntegratedTax");
+            pb_CentralTax.Value = fn_GST_Tally_Data_Maching(txt_GST_CentralTax.Text, txt_Tally_CentralTax.Text, "CentralTax");
+            pb_StateTax.Value = fn_GST_Tally_Data_Maching(txt_GST_StateTax.Text, txt_Tally_StateTax.Text, "StateTax");
+
+
         }
     }
 

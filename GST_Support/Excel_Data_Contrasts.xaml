@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Data Contrasts" Height="800" Width="1500">
     <Grid>
-        <Button x:Name="btn_Validate" Content="Validate" HorizontalAlignment="Left" Margin="344,841,0,0" VerticalAlignment="Top" Width="75" Click="btn_Validate_Click"/>
+        <Button x:Name="btn_Validate" Content="Validate" HorizontalAlignment="Left" Margin="420,69,0,0" VerticalAlignment="Top" Width="401" Click="btn_Validate_Click" Height="19"/>
         <Label Content="GST File Location" HorizontalAlignment="Left" Margin="10,8,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="txt_GST_FileLoc" HorizontalAlignment="Left" Height="23" Margin="116,9,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="390" IsEnabled="False"/>
         <Button x:Name="btn_GST_Browse" Content="Browse" HorizontalAlignment="Left" Margin="516,11,0,0" VerticalAlignment="Top" Width="75" Click="btn_GST_Browse_Click"/>
@@ -18,7 +18,7 @@
         <Button x:Name="btn_Tally_Browse" Content="Browse" HorizontalAlignment="Left" Margin="516,41,0,0" VerticalAlignment="Top" Width="75" Click="btn_Tally_Browse_Click"/>
         <Label Content="Sheet Name" HorizontalAlignment="Left" Margin="612,38,0,0" VerticalAlignment="Top"/>
         <TextBox x:Name="txt_tally_SheetName" HorizontalAlignment="Left" Height="23" Margin="692,38,0,0" TextWrapping="Wrap" Text="Sheet2" VerticalAlignment="Top" Width="56" RenderTransformOrigin="0.431,-0.117"/>
-        <Button x:Name="btn_Read_ExcelData" Content="Read Data" HorizontalAlignment="Left" Margin="10,69,0,0" VerticalAlignment="Top" Width="742" Click="btn_Read_ExcelData_Click"/>
+        <Button x:Name="btn_Read_ExcelData" Content="Read Data" HorizontalAlignment="Left" Margin="10,64,0,0" VerticalAlignment="Top" Width="356" Click="btn_Read_ExcelData_Click" Height="24"/>
         <DataGrid x:Name="dg_GST" HorizontalAlignment="Left" Height="300" AutoGenerateColumns="False" VerticalAlignment="Top" Width="838" Margin="12,105,0,0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
 
@@ -82,15 +82,80 @@
                 <DataGridTextColumn Header="% matching" Binding="{Binding PercentageMatching}" />
             </DataGrid.Columns>
         </DataGrid>
-        <Label Content="GST Invoice number" HorizontalAlignment="Left" Margin="874,356,0,0" VerticalAlignment="Top" Width="125"/>
-        <TextBox x:Name="txt_GST_INV_Number" HorizontalAlignment="Left" Height="23" Margin="999,356,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
-        <Grid Margin="999,377,321,365">
-            <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pbStatus" Height="30" Margin="0,0,-0.4,-1.6"   />
-            <TextBlock Text="{Binding ElementName=pbStatus, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+        <Grid Margin="874,330,301.6,322.4" x:Name="g_inv_number">
+            <Label Content="GST Invoice number" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="125"/>
+            <TextBox x:Name="txt_GST_INV_Number" HorizontalAlignment="Left" Height="23" Margin="140,13,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+            <Grid Margin="0,42,0,41">
+                <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pb_inv_number" Height="30" Margin="0,0,0,0"   />
+                <TextBlock Text="{Binding ElementName=pb_inv_number, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+
+            </Grid>
+            <Label Content="Tally Invoice number" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" Width="125"/>
+            <TextBox x:Name="txt_Tally_INV_Number" HorizontalAlignment="Left" Height="23" Margin="140,86,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
 
         </Grid>
-        <Label Content="Tally Invoice number" HorizontalAlignment="Left" Margin="874,404,0,0" VerticalAlignment="Top" Width="125"/>
-        <TextBox x:Name="txt_Tally_INV_Number" HorizontalAlignment="Left" Height="23" Margin="999,404,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+        <Grid Margin="1197,330,9.6,322.4" x:Name="g_Inv_Date">
+            <Label Content="GST Invoice Date" HorizontalAlignment="Left" Margin="4,10,0,0" VerticalAlignment="Top" Width="103"/>
+            <TextBox x:Name="txt_GST_INV_Date" HorizontalAlignment="Left" Height="23" Margin="112,13,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+            <Grid Margin="0,42,0,41">
+                <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pb_inv_Date" Height="30" Margin="0,0,0,0"   />
+                <TextBlock Text="{Binding ElementName=pb_inv_Date, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+
+            </Grid>
+            <Label Content="Tally Invoice Date" HorizontalAlignment="Left" Margin="4,82,0,0" VerticalAlignment="Top" Width="103"/>
+            <TextBox x:Name="txt_Tally_INV_Date" HorizontalAlignment="Left" Height="23" Margin="112,0,0,9" TextWrapping="Wrap" Text="" VerticalAlignment="Bottom" Width="173"/>
+
+        </Grid>
+
+        <Grid Margin="874,456,301.6,196.4" x:Name="g_inv_taxablevalue">
+            <Label Content="GST Taxable Value" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="125"/>
+            <TextBox x:Name="txt_GST_TaxableValue" HorizontalAlignment="Left" Height="23" Margin="140,13,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+            <Grid Margin="0,42,0,41">
+                <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pb_TaxableValue" Height="30" Margin="0,0,0,0"   />
+                <TextBlock Text="{Binding ElementName=pb_TaxableValue, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+
+            </Grid>
+            <Label Content="Tally Taxable value" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" Width="125"/>
+            <TextBox x:Name="txt_Tally_TaxableValue" HorizontalAlignment="Left" Height="23" Margin="140,86,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+
+        </Grid>
+        <Grid Margin="1197,456,9.6,196.4" x:Name="g_IntegratedTax">
+            <Label Content="GST Integrated Tax" HorizontalAlignment="Left" Margin="4,10,0,0" VerticalAlignment="Top" Width="103"/>
+            <TextBox x:Name="txt_GST_IntegratedTax" HorizontalAlignment="Left" Height="23" Margin="112,13,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+            <Grid Margin="0,42,0,41">
+                <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pb_IntegratedTax" Height="30" Margin="0,0,0,0"   />
+                <TextBlock Text="{Binding ElementName=pb_IntegratedTax, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+
+            </Grid>
+            <Label Content="Tally IntegratedTax" HorizontalAlignment="Left" Margin="4,82,0,0" VerticalAlignment="Top" Width="103"/>
+            <TextBox x:Name="txt_Tally_IntegratedTax" HorizontalAlignment="Left" Height="23" Margin="112,0,0,9" TextWrapping="Wrap" Text="" VerticalAlignment="Bottom" Width="173"/>
+
+        </Grid>
+
+        <Grid Margin="874,572,301.6,80.4" x:Name="g_CentralTax">
+            <Label Content="GST CentralTax" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Width="125"/>
+            <TextBox x:Name="txt_GST_CentralTax" HorizontalAlignment="Left" Height="23" Margin="140,13,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+            <Grid Margin="0,42,0,41">
+                <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pb_CentralTax" Height="30" Margin="0,0,0,0"   />
+                <TextBlock Text="{Binding ElementName=pb_CentralTax, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+
+            </Grid>
+            <Label Content="Tally Central Tax" HorizontalAlignment="Left" Margin="10,82,0,0" VerticalAlignment="Top" Width="125"/>
+            <TextBox x:Name="txt_Tally_CentralTax" HorizontalAlignment="Left" Height="23" Margin="140,86,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+
+        </Grid>
+        <Grid Margin="1197,570,9.6,82.4" x:Name="g_StateTax">
+            <Label Content="GST State Tax" HorizontalAlignment="Left" Margin="4,10,0,0" VerticalAlignment="Top" Width="103"/>
+            <TextBox x:Name="txt_GST_StateTax" HorizontalAlignment="Left" Height="23" Margin="112,13,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="173"/>
+            <Grid Margin="0,42,0,41">
+                <ProgressBar Minimum="0" Maximum="100" Value="75" Name="pb_StateTax" Height="30" Margin="0,0,0,0"   />
+                <TextBlock Text="{Binding ElementName=pb_StateTax, Path=Value, StringFormat={}{0:0}%}" HorizontalAlignment="Center" VerticalAlignment="Center"  Height="17"  />
+
+            </Grid>
+            <Label Content="Tally State Tax" HorizontalAlignment="Left" Margin="4,82,0,0" VerticalAlignment="Top" Width="103"/>
+            <TextBox x:Name="txt_Tally_StateTax" HorizontalAlignment="Left" Height="23" Margin="112,0,0,9" TextWrapping="Wrap" Text="" VerticalAlignment="Bottom" Width="173"/>
+
+        </Grid>
 
     </Grid>
 </Window>
